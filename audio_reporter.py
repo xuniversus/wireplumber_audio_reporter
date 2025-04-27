@@ -9,6 +9,12 @@ def parse_wpctl_status():
     output = str(
         subprocess.check_output(
             "wpctl status", shell=True, encoding='utf-8'))
+    # remove the ascii tree characters and return a list of lines
+    output = output\
+        .replace("├", "")\
+        .replace("─", "")\
+        .replace("│", "")\
+        .replace("└", "")
 
     sinks = parse_wpctl("Sinks:", output)
     sources = parse_wpctl("Sources:", output)
@@ -19,12 +25,8 @@ def parse_wpctl_status():
 def parse_wpctl(starting, output):
     if starting != "Sinks:" and starting != "Sources:":
         raise ValueError("Unexpected starting value '%s'" % starting)
-    # remove the ascii tree characters and return a list of lines
-    lines = output\
-        .replace("├", "")\
-        .replace("─", "")\
-        .replace("│", "")\
-        .replace("└", "").splitlines()
+
+    lines = output.splitlines()
 
     things = []
     # get the index of the Sinks line as a starting point
