@@ -1,38 +1,61 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 import subprocess
+import re
+import json
 
-# function to parse output of command "wpctl status" and return a dictionary of sinks with their id and name.
+
 def parse_wpctl_status():
     # Execute the wpctl status command and store the output in a variable.
-    output = str(subprocess.check_output("wpctl status", shell=True, encoding='utf-8'))
+    output = str(
+        subprocess.check_output(
+            "wpctl status", shell=True, encoding='utf-8'))
 
+    sinks = parse_wpctl("Sinks:", output)
+    sources = parse_wpctl("Sources:", output)
+
+    return {"sinks": sinks, "sources": sources}
+
+
+def parse_wpctl(starting, output):
+    if starting != "Sinks:" and starting != "Sources:":
+        raise ValueError("Unexpected starting value '%s'" % starting)
     # remove the ascii tree characters and return a list of lines
-    lines = output.replace("├", "").replace("─", "").replace("│", "").replace("└", "").splitlines()
+    lines = output\
+        .replace("├", "")\
+        .replace("─", "")\
+        .replace("│", "")\
+        .replace("└", "").splitlines()
 
+    things = []
     # get the index of the Sinks line as a starting point
-    sinks_index = None
-    for index, line in enumerate(lines):
-        if "Sinks:" in line:
-            sinks_index = index
+    thing_found = False
+    for line in lines:
+        if starting in line:
+            thing_found = True
+            continue
+        if not line.strip() and thing_found:
             break
+        if thing_found:
+            thing = {}
+            line = line.strip()
+            if line.startswith("*"):
+                thing["default"] = True
+            else:
+                thing["default"] = False
 
-    # start by getting the lines after "Sinks:" and before the next blank line and store them in a list
-    sinks = []
-    for line in lines[sinks_index +1:]:
-        if not line.strip():
-            break
-        sinks.append(line.strip())
+            match = re.search(r'\[vol:\s*([0-9]+\.[0-9]+)\]', line)
+            if match:
+                volumen = match.group(1)
+                thing["volume"] = int(float(volumen) * 100.0)
 
-    # remove the "[vol:" from the end of the sink name
-    for index, sink in enumerate(sinks):
-        sinks[index] = sink.split("[vol:")[0].strip()
-    
-    # strip the * from the default sink and instead append "- Default" to the end. Looks neater in the wofi list this way.
-    for index, sink in enumerate(sinks):
-        if sink.startswith("*"):
-            sinks[index] = sink.strip().replace("*", "").strip() + " - Default"
+            # remove the "[vol:" from the end of the sink name
+            line = line.split("[vol:")[0].strip()
+            thing["id"] = int(line.split(".")[0].replace("*", ""))
+            thing["name"] = line.split(".")[1].strip()
 
-    # make the dictionary in this format {'sink_id': <int>, 'sink_name': <str>}
-    return {"sinks": [{"sink_id": int(sink.split(".")[0]), "sink_name": sink.split(".")[1].strip()} for sink in sinks]}
+            things.append(thing)
 
-print(parse_wpctl_status())
+    return things
+
+
+print(json.dumps(parse_wpctl_status()))
