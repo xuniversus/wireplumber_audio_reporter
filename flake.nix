@@ -45,6 +45,7 @@
             ps.black
             ps.isort
             ps.flake8
+            ps.pudb
           ]);
         in
         {
