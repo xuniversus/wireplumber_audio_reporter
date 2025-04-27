@@ -1,34 +1,67 @@
-# waybar_wireplumber_audio_changer
-A script that uses wofi and wpctl to change audio sinks. Can be used with waybar to make a clickable audio sink changer
+# wireplumber audio reporter
+A script that uses wpctl to list audio sinks and sources, returns a JSON string.
 
-Needs to have wofi installed, as well as wireplumber in order to use the wpctl command.
+# How to Install
+copy the ```audio_reporter.py``` file to your ```$PATH```.
+Then: ```chmod +x audio_reporter.py```
 
-![Example Screenshot](example.png)
-
-# How to Install  
-copy the ```audio_changer.py``` file to your ```~/.config/waybar/scripts/``` folder.   
-Then: ```chmod +x audio_changer.py```    
-You can then add it to the ```.config/waybar/config.jsonc``` file under pulseaudio **'on-click'** property as below:  
-```"pulseaudio": {
-        "format": "{icon} {volume}%",
-        "tooltip": false,
-        "format-muted": " Muted",
-        "on-click": "~/.config/waybar/scripts/audio_changer.py",
-        "on-scroll-up": "pamixer -i 5",
-        "on-scroll-down": "pamixer -d 5",
-        "scroll-step": 5,
-        "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": ["", "", ""]
-        }
-    },
+Example output:
+```shell
+$ python audio_changer.py | jq '.'
 ```
-
-# Keybinding in hypr.conf
-You can also add a bind in the ```~/.config/hypr/hyprland.conf``` file as so:  
-```bind = , F4, exec, ~/.config/waybar/scripts/audio_changer.py```
+```json
+{
+  "sinks": [
+    {
+      "default": false,
+      "volume": 100,
+      "id": 59,
+      "name": "Loopback Estéreo analógico"
+    },
+    {
+      "default": false,
+      "volume": 100,
+      "id": 60,
+      "name": "Starship/Matisse HD Audio Controller Estéreo digital (IEC958)"
+    },
+    {
+      "default": true,
+      "volume": 100,
+      "id": 62,
+      "name": "Navi 21/23 HDMI/DP Audio Controller Estéreo digital (HDMI)"
+    },
+    {
+      "default": false,
+      "volume": 100,
+      "id": 70,
+      "name": "UMC202HD 192k Line A"
+    }
+  ],
+  "sources": [
+    {
+      "default": false,
+      "volume": 100,
+      "id": 61,
+      "name": "Starship/Matisse HD Audio Controller Estéreo analógico"
+    },
+    {
+      "default": false,
+      "volume": 100,
+      "id": 66,
+      "name": "Loopback Estéreo analógico"
+    },
+    {
+      "default": false,
+      "volume": 100,
+      "id": 69,
+      "name": "UMC202HD 192k Input 2"
+    },
+    {
+      "default": true,
+      "volume": 100,
+      "id": 71,
+      "name": "UMC202HD 192k Input 1"
+    }
+  ]
+}
+```
