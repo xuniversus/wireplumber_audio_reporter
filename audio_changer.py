@@ -33,28 +33,6 @@ def parse_wpctl_status():
             sinks[index] = sink.strip().replace("*", "").strip() + " - Default"
 
     # make the dictionary in this format {'sink_id': <int>, 'sink_name': <str>}
-    sinks_dict = [{"sink_id": int(sink.split(".")[0]), "sink_name": sink.split(".")[1].strip()} for sink in sinks]
+    return {"sinks": [{"sink_id": int(sink.split(".")[0]), "sink_name": sink.split(".")[1].strip()} for sink in sinks]}
 
-    return sinks_dict
-
-# get the list of sinks ready to put into wofi - highlight the current default sink
-output = ''
-sinks = parse_wpctl_status()
-for items in sinks:
-    if items['sink_name'].endswith(" - Default"):
-        output += f"<b>-> {items['sink_name']}</b>\n"
-    else:
-        output += f"{items['sink_name']}\n"
-
-# Call wofi and show the list. take the selected sink name and set it as the default sink
-wofi_command = f"echo '{output}' | wofi --show=dmenu --hide-scroll --allow-markup --define=hide_search=true --location=top_right --width=600 --height=200 --xoffset=-60"
-wofi_process = subprocess.run(wofi_command, shell=True, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-if wofi_process.returncode != 0:
-    print("User cancelled the operation.")
-    exit(0)
-
-selected_sink_name = wofi_process.stdout.strip()
-sinks = parse_wpctl_status()
-selected_sink = next(sink for sink in sinks if sink['sink_name'] == selected_sink_name)
-subprocess.run(f"wpctl set-default {selected_sink['sink_id']}", shell=True)
+print(parse_wpctl_status())
