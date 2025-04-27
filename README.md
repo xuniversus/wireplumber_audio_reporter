@@ -7,7 +7,7 @@ Then: ```chmod +x audio_reporter.py```
 
 Example output:
 ```shell
-$ python audio_changer.py | jq '.'
+$ python audio_reporter.py | jq '.'
 ```
 ```json
 {
