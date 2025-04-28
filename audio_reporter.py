@@ -50,7 +50,7 @@ def parse_wpctl(starting, output):
             else:
                 thing["mute"] = False
 
-            match = re.search(r'\[vol:\s*([0-9]+\.[0-9]+)\]', line)
+            match = re.search(r'\[vol:\s*([0-9]+\.[0-9]+)', line)
             if match:
                 volumen = match.group(1)
                 thing["volume"] = int(float(volumen) * 100.0)
