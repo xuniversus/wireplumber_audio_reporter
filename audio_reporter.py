@@ -45,6 +45,11 @@ def parse_wpctl(starting, output):
             else:
                 thing["default"] = False
 
+            if "MUTED" in line:
+                thing["mute"] = True
+            else:
+                thing["mute"] = False
+
             match = re.search(r'\[vol:\s*([0-9]+\.[0-9]+)\]', line)
             if match:
                 volumen = match.group(1)
