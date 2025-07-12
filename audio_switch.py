@@ -60,7 +60,6 @@ def parse_wpctl(starting, output):
 def get_selected_id(device: str, devices: dict):
 
     for siso in devices:
-        print(siso)
         if siso["name"] == device and not siso["default"]:
             return siso["id"]
     return None
